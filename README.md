@@ -186,10 +186,9 @@ security@pesa.co. Do not open a public issue.
 
 1. Set the version in `package.json`. Move the Unreleased notes in
    `CHANGELOG.md`.
-2. Commit on `main` with an SSH key listed in `.github/allowed_signers`.
-   Then `git tag vX.Y.Z && git push origin vX.Y.Z`. Only repository admins
-   can push a `v*` tag.
-3. `release.yml` verifies that the tagged commit is signed by a maintainer, runs the tests, publishes
+2. Tag with an SSH key listed in `.github/allowed_signers`:
+   `git tag -s vX.Y.Z -m "vX.Y.Z"`. Push the tag.
+3. `release.yml` verifies the tag signature, runs the tests, publishes
    `@pesa/checkout-js` to npm with provenance, and attaches `dist/` and
    `SHA256SUMS` to a GitHub release. The `js.pesa.co` CDN takes its copy
    from that release.

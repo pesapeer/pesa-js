@@ -80,7 +80,7 @@ Rules for changes:
   change.
 - Do not edit `dist/`. The build makes it.
 - Do not edit `.github/allowed_signers` or `.github/verify-tag.sh`.
-- Do not create tags. A maintainer pushes release tags from a signed commit.
+- Do not create tags. A maintainer signs and pushes release tags.
 - Do not add `Co-Authored-By` or similar trailers to commit messages.
 
 ## Terms
