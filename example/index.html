@@ -1,0 +1,52 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width,initial-scale=1">
+<title>Pesa.js example</title>
+<style>
+  body { font: 16px/1.5 system-ui, sans-serif; color: #0f172a; background: #f8fafc; margin: 0; padding: 32px 16px; }
+  main { max-width: 440px; margin: 0 auto; background: #fff; border-radius: 12px; padding: 24px; box-shadow: 0 1px 3px rgba(0,0,0,.08); }
+  label { display: block; font-size: 13px; color: #475569; margin: 12px 0 4px; }
+  input { width: 100%; box-sizing: border-box; padding: 8px 10px; border: 1px solid #cbd5e1; border-radius: 8px; font-size: 14px; }
+  button { margin-top: 16px; width: 100%; padding: 12px; border: 0; border-radius: 8px; background: #1d4ed8; color: #fff; font-size: 16px; font-weight: 600; }
+  button[disabled] { opacity: .6; }
+  #card { margin-top: 16px; border: 1px solid #e2e8f0; border-radius: 8px; overflow: hidden; }
+  pre { background: #f1f5f9; padding: 12px; border-radius: 8px; font-size: 13px; white-space: pre-wrap; }
+</style>
+</head>
+<body>
+<main>
+  <h1 style="font-size:18px;margin:0">Pesa.js example</h1>
+  <p style="color:#475569;margin:4px 0 0">Create an intent server-side (<code>POST /v1/intents</code>), then paste its id and client secret.</p>
+  <label for="checkout">Checkout URL</label><input id="checkout" value="https://checkout.pesa.co">
+  <label for="intent">Intent id</label><input id="intent" placeholder="int_…">
+  <label for="secret">Client secret</label><input id="secret" placeholder="from the create response only">
+  <button id="mount" type="button">Mount card element</button>
+  <div id="card"></div>
+  <button id="pay" type="button" disabled>Pay</button>
+  <pre id="log"></pre>
+</main>
+<script src="../dist/pesa.js"></script>
+<script>
+  var log = document.getElementById('log');
+  function say(x) { log.textContent += (typeof x === 'string' ? x : JSON.stringify(x)) + '\n'; }
+  var card = null, pay = document.getElementById('pay');
+  document.getElementById('mount').addEventListener('click', function () {
+    if (card) card.unmount();
+    var pesa = Pesa({ checkoutUrl: document.getElementById('checkout').value });
+    card = pesa.mountCard('#card', {
+      intentId: document.getElementById('intent').value,
+      clientSecret: document.getElementById('secret').value,
+      appearance: { theme: 'pesa' }
+    });
+    card.on('ready', function () { say('ready'); pay.disabled = false; });
+    card.on('change', function (e) { say(e); pay.disabled = !e.complete; });
+  });
+  pay.addEventListener('click', function () {
+    pay.disabled = true;
+    card.pay().then(function (r) { say(r); }, function (e) { say('error: ' + e.message); pay.disabled = false; });
+  });
+</script>
+</body>
+</html>

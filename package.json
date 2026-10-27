@@ -1,0 +1,46 @@
+{
+  "name": "@pesa/checkout-js",
+  "version": "0.1.0",
+  "description": "Pesa.js: the merchant loader and Card Element for Pesa card acquiring",
+  "license": "MIT",
+  "homepage": "https://github.com/pesapeer/pesa-js#readme",
+  "repository": {
+    "type": "git",
+    "url": "git+https://github.com/pesapeer/pesa-js.git"
+  },
+  "bugs": {
+    "url": "https://github.com/pesapeer/pesa-js/issues"
+  },
+  "keywords": [
+    "pesa",
+    "checkout",
+    "payments",
+    "card",
+    "acquiring"
+  ],
+  "type": "module",
+  "main": "dist/pesa.esm.js",
+  "module": "dist/pesa.esm.js",
+  "browser": "dist/pesa.js",
+  "types": "dist/pesa.d.ts",
+  "sideEffects": false,
+  "files": [
+    "dist"
+  ],
+  "publishConfig": {
+    "access": "public",
+    "provenance": true
+  },
+  "scripts": {
+    "build": "node scripts/build.mjs",
+    "test": "vitest run",
+    "typecheck": "tsc --noEmit"
+  },
+  "devDependencies": {
+    "@types/node": "^22.0.0",
+    "esbuild": "^0.28.2",
+    "jsdom": "^30.1.3",
+    "typescript": "^7.0.2",
+    "vitest": "^5.0.5"
+  }
+}

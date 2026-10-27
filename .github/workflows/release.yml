@@ -1,0 +1,52 @@
+name: Release
+
+# A tag vX.Y.Z on a maintainer-signed commit publishes @pesa/checkout-js to npm with provenance
+# (npm trusted publishing: no token, OIDC from this workflow) and attaches
+# dist/ to a GitHub release. The checkout edge (checkout.pesa.co) takes its
+# CDN copy of pesa.js from that release's assets.
+
+on:
+  push:
+    tags: ["v*"]
+
+permissions:
+  contents: read
+
+jobs:
+  release:
+    runs-on: ubuntu-latest
+    permissions:
+      contents: write
+      id-token: write
+    steps:
+      - uses: actions/checkout@v4
+        with:
+          fetch-depth: 0
+      - name: Verify the tagged commit is signed by a maintainer
+        run: .github/verify-tag.sh "${GITHUB_REF_NAME}"
+      - name: Check the tag matches package.json
+        run: |
+          v=$(node -p "require('./package.json').version")
+          [ "v$v" = "${GITHUB_REF_NAME}" ] || { echo "package.json is $v, tag is ${GITHUB_REF_NAME}" >&2; exit 1; }
+      - uses: actions/setup-node@v4
+        with:
+          node-version: 22
+          registry-url: https://registry.npmjs.org
+          cache: npm
+      - run: npm ci
+      - run: npm run typecheck
+      - run: npm test
+      - run: npm run build
+      - run: npm publish --provenance --access public
+      - name: Checksums
+        run: (cd dist && sha256sum pesa.js pesa.*.js pesa.esm.js pesa.d.ts > SHA256SUMS)
+      - uses: softprops/action-gh-release@v2
+        with:
+          files: |
+            dist/pesa.js
+            dist/pesa.*.js
+            dist/pesa.esm.js
+            dist/pesa.d.ts
+            dist/manifest.json
+            dist/SHA256SUMS
+          generate_release_notes: true
