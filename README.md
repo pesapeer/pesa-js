@@ -116,6 +116,7 @@ of the intent.** A client result can be forged. A gateway event cannot.
 | `clientSecret` | From the create response. |
 | `appearance` | Optional style tokens. Max 4 KB as JSON. |
 | `origin` | Optional. The page origin the element answers to. Default: `window.location.origin`. |
+| `locale` | Optional. `en`, `fr`, `fr-CA` or `zh-Hans`. The language of the element, its messages and the 3-D Secure pages. Default: the intent's `locale`, then the browser's language, then English. |
 
 `CardElement` methods:
 
@@ -139,7 +140,7 @@ its token.
 
 ### `client.mountExpress(target, options)` → element
 
-Options are the same as `mountCard` without `appearance`.
+Options are the same as `mountCard` without `appearance`. `locale` works the same way.
 
 - Mounts the one-tap methods the intent offers: Apple Pay (Safari with a
   card in Wallet), Google Pay, and pay by bank when the intent has a

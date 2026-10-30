@@ -4,9 +4,13 @@
 // instead; the edge's return page then brings the browser back to the
 // merchant's returnUrl.
 
+import { wordsFor, type Words } from "./strings";
+
 export interface ChallengeOptions {
   loadTimeoutMs: number;
   navigate: (url: string) => void;
+  /** The modal's own words; English when absent. */
+  words?: Words;
 }
 
 export interface Challenge {
@@ -21,20 +25,21 @@ const linkStyle =
   "position:absolute;bottom:16px;left:0;right:0;text-align:center;font:14px system-ui,sans-serif;color:#fff";
 
 export function openChallenge(doc: Document, url: string, opts: ChallengeOptions): Challenge {
+  const words = opts.words ?? wordsFor();
   const overlay = doc.createElement("div");
   overlay.setAttribute("style", overlayStyle);
   overlay.setAttribute("data-pesa-challenge", "");
 
   const frame = doc.createElement("iframe");
   frame.setAttribute("style", frameStyle);
-  frame.setAttribute("title", "Card authentication");
+  frame.setAttribute("title", words.challenge);
   frame.setAttribute("allow", "payment");
   frame.src = url;
 
   const link = doc.createElement("a");
   link.setAttribute("style", linkStyle);
   link.href = url;
-  link.textContent = "Having trouble? Continue on your bank's page";
+  link.textContent = words.trouble;
   link.addEventListener("click", (e) => {
     e.preventDefault();
     fallback();

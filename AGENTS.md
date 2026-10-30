@@ -56,6 +56,7 @@ Layout:
 | `src/element.ts` | `CardElement`: iframe mount, events, `pay()`. |
 | `src/challenge.ts` | 3-D Secure modal and fallback. |
 | `src/messages.ts` | Message types and result types. |
+| `src/strings.ts` | `Locale` and the few words the script shows itself. |
 | `test/` | vitest + jsdom. |
 | `scripts/build.mjs` | esbuild. Outputs `dist/`. |
 | `.github/workflows/ci.yml` | Typecheck, test, build on push and PR. |

@@ -1,4 +1,5 @@
 import { openChallenge, type Challenge } from "./challenge";
+import { wordsFor, type Locale } from "./strings";
 import {
   isElementMessage,
   type BankMessage,
@@ -16,6 +17,11 @@ export interface MountCardOptions {
   appearance?: Record<string, unknown>;
   /** The merchant page's origin, when it differs from window.location.origin (an embedded widget, say). */
   origin?: string;
+  /**
+   * The language of the element and of the 3-D Secure pages. Absent, the checkout uses the intent's
+   * `locale`, then the browser's language, then English.
+   */
+  locale?: Locale;
 }
 
 export interface CardElementEvents {
@@ -49,13 +55,16 @@ export class CardElement {
   private pending: { resolve: (r: PayResult) => void; reject: (e: Error) => void } | null = null;
   private challenge: Challenge | null = null;
   private readonly intentId: string;
+  private readonly locale?: Locale;
 
   constructor(container: Element, opts: MountCardOptions, private readonly cfg: CardElementConfig) {
     this.intentId = opts.intentId;
+    this.locale = opts.locale;
     const view = cfg.view ?? "card";
+    const words = wordsFor(opts.locale);
     this.iframe = cfg.window.document.createElement("iframe");
     this.iframe.src = elementURL(cfg.checkoutOrigin, opts, cfg.window.location.origin, view);
-    this.iframe.setAttribute("title", view === "express" ? "Express payment" : "Card details");
+    this.iframe.setAttribute("title", view === "express" ? words.express : words.card);
     this.iframe.setAttribute("allow", "payment");
     this.iframe.setAttribute("sandbox", "allow-scripts allow-forms allow-same-origin");
     this.iframe.setAttribute("scrolling", "no");
@@ -168,9 +177,10 @@ export class CardElement {
     }
     if (msg.challengeUrl && msg.attempt?.state === "requires_3ds") {
       if (!this.challenge) {
-        this.challenge = openChallenge(this.cfg.window.document, msg.challengeUrl, {
+        this.challenge = openChallenge(this.cfg.window.document, withLang(msg.challengeUrl, this.cfg.checkoutOrigin, this.locale), {
           loadTimeoutMs: this.cfg.challengeLoadTimeoutMs,
           navigate: this.cfg.navigate,
+          words: wordsFor(this.locale),
         });
       }
       return;
@@ -196,7 +206,21 @@ export function elementURL(checkoutOrigin: string, opts: MountCardOptions, pageO
   params.set("origin", opts.origin ?? pageOrigin);
   if (view !== "card") params.set("view", view);
   if (opts.appearance) params.set("a", encodeAppearance(opts.appearance));
+  if (opts.locale) params.set("lang", opts.locale);
   return `${checkoutOrigin}/c/${encodeURIComponent(opts.intentId)}/element?${params.toString()}`;
+}
+
+/** The challenge page on the checkout, in the element's language. Any other URL is left as it is. */
+export function withLang(url: string, checkoutOrigin: string, locale?: Locale): string {
+  if (!locale) return url;
+  try {
+    const u = new URL(url);
+    if (u.origin !== checkoutOrigin) return url;
+    u.searchParams.set("lang", locale);
+    return u.toString();
+  } catch {
+    return url;
+  }
 }
 
 export function encodeAppearance(appearance: Record<string, unknown>): string {

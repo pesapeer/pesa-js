@@ -14,6 +14,7 @@ import { CardElement, type MountCardOptions } from "./element";
 
 export type { MountCardOptions, CardElementEvents, ElementView } from "./element";
 export type { Attempt, AttemptMethod, AttemptState, CardBrand, ChangeEvent, IntentState, PayResult } from "./messages";
+export type { Locale } from "./strings";
 export { CardElement };
 
 export interface PesaOptions {

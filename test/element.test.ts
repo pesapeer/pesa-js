@@ -1,6 +1,6 @@
 import { afterEach, beforeEach, describe, expect, it, vi } from "vitest";
 import { Pesa } from "../src/index";
-import { encodeAppearance } from "../src/element";
+import { encodeAppearance, withLang } from "../src/element";
 
 const checkoutOrigin = "https://checkout.pesa.co";
 const intentId = "int_01HXYZ";
@@ -267,5 +267,53 @@ describe("mountExpress", () => {
       origin: checkoutOrigin, source: expressFrame().contentWindow,
     }));
     expect(result).toHaveBeenCalledWith(expect.objectContaining({ state: "succeeded", intentState: "settled" }));
+  });
+});
+
+describe("locale", () => {
+  beforeEach(() => {
+    document.body.innerHTML = '<div id="card"></div>';
+  });
+  afterEach(() => {
+    vi.useRealTimers();
+    vi.restoreAllMocks();
+    document.body.innerHTML = "";
+  });
+
+  it("asks the element for the language and titles the iframe in it", () => {
+    Pesa().mountCard("#card", { intentId, clientSecret, locale: "fr-CA" });
+    const frame = mountedFrame();
+    expect(new URL(frame.src).searchParams.get("lang")).toBe("fr-CA");
+    expect(frame.getAttribute("title")).toBe("Informations de la carte");
+  });
+
+  it("leaves the language to the checkout when none is given", () => {
+    Pesa().mountCard("#card", { intentId, clientSecret });
+    const frame = mountedFrame();
+    expect(new URL(frame.src).searchParams.has("lang")).toBe(false);
+    expect(frame.getAttribute("title")).toBe("Card details");
+  });
+
+  it("opens the challenge in the element's language", () => {
+    vi.useFakeTimers();
+    const card = Pesa().mountCard("#card", { intentId, clientSecret, locale: "zh-Hans" });
+    vi.spyOn(mountedFrame().contentWindow!, "postMessage").mockImplementation(() => {});
+    fromElement({ type: "pesa:ready" });
+    void card.pay().catch(() => {});
+    const challengeUrl = `${checkoutOrigin}/c/${intentId}/challenge?t=${clientSecret}`;
+    fromElement({ type: "pesa:result", state: "requires_action", intentId, attempt: { state: "requires_3ds" }, challengeUrl });
+    const overlay = document.querySelector("[data-pesa-challenge]")!;
+    const src = new URL((overlay.querySelector("iframe") as HTMLIFrameElement).src);
+    expect(src.searchParams.get("t")).toBe(clientSecret);
+    expect(src.searchParams.get("lang")).toBe("zh-Hans");
+    expect(overlay.querySelector("iframe")!.getAttribute("title")).toBe("银行卡验证");
+    expect(overlay.querySelector("a")!.textContent).toBe("遇到问题？前往银行页面继续");
+    card.unmount();
+  });
+
+  it("adds the language only to a challenge on the checkout", () => {
+    expect(withLang("https://acs.example/x?y=1", checkoutOrigin, "fr")).toBe("https://acs.example/x?y=1");
+    expect(withLang(`${checkoutOrigin}/c/i/challenge?t=s`, checkoutOrigin, undefined)).toBe(`${checkoutOrigin}/c/i/challenge?t=s`);
+    expect(withLang(`${checkoutOrigin}/c/i/challenge?t=s`, checkoutOrigin, "fr")).toBe(`${checkoutOrigin}/c/i/challenge?t=s&lang=fr`);
   });
 });

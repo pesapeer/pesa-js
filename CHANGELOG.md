@@ -7,6 +7,10 @@ All notable changes to this project are documented here. The format follows
 ## [Unreleased]
 
 ### Added
+- `locale` on `mountCard` and `mountExpress`: `en`, `fr`, `fr-CA` or
+  `zh-Hans`. The elements, their `change` and `result` messages and the
+  3-D Secure pages use it; the iframe titles and the 3-D Secure fallback
+  link follow it too. Exported as the `Locale` type.
 - Saved cards: the Card Element shows the customer's cards on file and a
   "Save this card for next time" box. `change` events carry
   `savedCardSelected` and `saveCard`.
