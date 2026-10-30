@@ -66,7 +66,7 @@ The npm package is only the loader. The elements always load from
     appearance: { theme: 'pesa' },
   });
   card.on('change', (e) => {
-    // e = { complete, brand, error? }
+    // e = { complete, brand, error?, savedCardSelected, saveCard }
     payButton.disabled = !e.complete;
   });
 
@@ -129,6 +129,14 @@ of the intent.** A client result can be forged. A gateway event cannot.
 - `unmount()`.
 - `focus()`.
 
+Saved cards: when the intent names a `customerReference`, the element shows
+the customer's saved cards above the card fields. The first is chosen. The
+customer can pick "Use another card" to type a new one, and tick "Save this
+card for next time". `pay()` works the same either way. The `change` event
+says which: `savedCardSelected` is true while a saved card is chosen, and
+`saveCard` is true while the box is ticked. The page never sees the card or
+its token.
+
 ### `client.mountExpress(target, options)` → element
 
 Options are the same as `mountCard` without `appearance`.
@@ -158,7 +166,7 @@ Element to page:
 | `type` | Fields |
 |---|---|
 | `pesa:ready` | none |
-| `pesa:change` | `complete`, `brand`, `error?` |
+| `pesa:change` | `complete`, `brand`, `error?`, `savedCardSelected`, `saveCard` |
 | `pesa:resize` | `height` in px |
 | `pesa:result` | `state`, `intentId`, `intentState?`, `attempt?`, `challengeUrl?` |
 

@@ -38,6 +38,10 @@ export interface ChangeEvent {
   complete: boolean;
   brand: CardBrand;
   error?: string;
+  /** True while the payer has one of their saved cards chosen instead of typing a card. */
+  savedCardSelected: boolean;
+  /** True while the payer has ticked "Save this card for next time" on a new card. */
+  saveCard: boolean;
 }
 
 /** What `pay()` resolves with: the state as the browser saw it. */

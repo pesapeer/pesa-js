@@ -139,7 +139,13 @@ export class CardElement {
         if (this.pending) this.submit();
         return;
       case "pesa:change":
-        this.emit("change", { complete: msg.complete, brand: msg.brand, error: msg.error });
+        this.emit("change", {
+          complete: msg.complete,
+          brand: msg.brand,
+          error: msg.error,
+          savedCardSelected: msg.savedCardSelected === true,
+          saveCard: msg.saveCard === true,
+        });
         return;
       case "pesa:resize":
         if (Number.isFinite(msg.height) && msg.height > 0) this.iframe.style.height = `${Math.ceil(msg.height)}px`;

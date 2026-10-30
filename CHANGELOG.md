@@ -7,6 +7,9 @@ All notable changes to this project are documented here. The format follows
 ## [Unreleased]
 
 ### Added
+- Saved cards: the Card Element shows the customer's cards on file and a
+  "Save this card for next time" box. `change` events carry
+  `savedCardSelected` and `saveCard`.
 - `mountExpress`: Apple Pay, Google Pay and pay by bank on an intent, each a
   one-tap button inside the element iframe; `payByBank()` for a merchant's
   own button. A bank attempt sends the browser to the bank.

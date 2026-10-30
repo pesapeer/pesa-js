@@ -74,7 +74,19 @@ describe("messages", () => {
     fromElement({ type: "pesa:change", complete: true, brand: "visa" }, { source: window });
     expect(change).not.toHaveBeenCalled();
     fromElement({ type: "pesa:change", complete: true, brand: "visa" });
-    expect(change).toHaveBeenCalledWith({ complete: true, brand: "visa", error: undefined });
+    expect(change).toHaveBeenCalledWith({ complete: true, brand: "visa", error: undefined, savedCardSelected: false, saveCard: false });
+  });
+
+  it("reports a chosen saved card and the payer's consent to save a new one", () => {
+    const card = Pesa().mountCard("#card", { intentId, clientSecret });
+    const change = vi.fn();
+    card.on("change", change);
+    fromElement({ type: "pesa:change", complete: true, brand: "visa", savedCardSelected: true, saveCard: false });
+    expect(change).toHaveBeenLastCalledWith({ complete: true, brand: "visa", error: undefined, savedCardSelected: true, saveCard: false });
+    fromElement({ type: "pesa:change", complete: false, brand: "", error: "Enter your card number.", savedCardSelected: false, saveCard: true });
+    expect(change).toHaveBeenLastCalledWith({ complete: false, brand: "", error: "Enter your card number.", savedCardSelected: false, saveCard: true });
+    fromElement({ type: "pesa:change", complete: true, brand: "visa", savedCardSelected: "yes", saveCard: 1 });
+    expect(change).toHaveBeenLastCalledWith({ complete: true, brand: "visa", error: undefined, savedCardSelected: false, saveCard: false });
   });
 
   it("emits ready and resizes the iframe", () => {
